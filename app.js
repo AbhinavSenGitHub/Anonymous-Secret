@@ -16,8 +16,8 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String
 });
-const secret = "Thisourlittlesecret.";
-userSchema.plugin(encrypt, {secret: secret, encryptedFields: ["password"]});  // phugin that is require to perform encryption on the schema
+
+userSchema.plugin(encrypt, {secret: process.env.SECRET, encryptedFields: ["password"]});  // phugin that is require to perform encryption on the schema
 
 const User = new mongoose.model("User", userSchema);
 
