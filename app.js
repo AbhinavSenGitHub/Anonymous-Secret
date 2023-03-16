@@ -4,8 +4,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const ejs = require("ejs");
-const mongoose = require("mongoose")
-const encrypt = require("mongoose-encryption");
+const mongoose = require("mongoose");
+// const md5 = require("md5");
+const bcrypt = require("bcrypt");      // hashing our password
+const saltRounds = 10;                // hashing password 10 times
+
 
 mongoose.connect("mongodb://0.0.0.0:27017/userDB", {useNewUrlParser: true});
 app.use(express.static("public"));
@@ -16,8 +19,6 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String
 });
-
-userSchema.plugin(encrypt, {secret: process.env.SECRET, encryptedFields: ["password"]});  // phugin that is require to perform encryption on the schema
 
 const User = new mongoose.model("User", userSchema);
 
@@ -35,34 +36,40 @@ app.get("/register", function(req, res){
 
 
 app.post("/register", function(req, res){
-  const newUser = new User({
-    email: req.body.username,
-    password: req.body.password
-  });
-  newUser.save(function(err){
-    if(err){
-      console.log(err);
-    }else{
-      res.render("secrets");
-    }
+
+  bcrypt.hash(req.body.password, saltRounds, function(err, hash){
+    const newUser = new User({
+      email: req.body.username,
+      password: hash
+    });
+    newUser.save(function(err){
+      if(err){
+        console.log(err);
+      }else{
+        res.render("secrets");
+      }
+    })
   })
+
 });
 
 app.post("/login", function(req, res){
-  const username = req.body.username;
-  const password = req.body.password;
-  User.findOne({email: username}, function(err, foundUser){
-    if(err){
-      console.log(err);
-    }else{
-      if(foundUser.password === password){
-        res.render("secrets");
+
+
+    const username = req.body.username;
+    const password = req.body.password;
+    User.findOne({email: username}, function(err, foundUser){
+      if(err){
+        console.log(err);
       }else{
-        res.send("User with that username not found 😥");
+        bcrypt.compare(password, foundUser.password, function(err, result){
+          if(result){
+            res.render("secrets");
+          }
+        });
       }
-    }
-  })
-})
+    });
+});
 
 
 
