@@ -23,7 +23,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 //  authentication  */
-mongoose.connect(process.env.MongoDBURL, {                    //"mongodb://0.0.0.0:27017/userDB" 
+mongoose.connect("mongodb+srv://abhinavsen987:kZsBncjh8amp8h1j@cluster0.fedvfkw.mongodb.net/userDB", {                    //"mongodb://0.0.0.0:27017/userDB" 
   useNewUrlParser: true
 });
 
